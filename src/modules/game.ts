@@ -1,41 +1,57 @@
 import { Egg, EggState } from "./egg.js";
 
 interface GameParams {
-    eggElement: HTMLImageElement |  null;
+    eggElement: HTMLImageElement | null;
     counterElement: HTMLParagraphElement | null;
 }
 
-interface IGame extends GameParams {
-
-}
+interface IGame extends GameParams {}
 
 export class Game implements IGame {
     counterElement: HTMLParagraphElement | null = null;
     eggElement: HTMLImageElement | null = null;
-    eggInstance = new Egg();
-
-
+    stopWatch: number | null = null;
+    secondsPassed: number = 0;
+    eggInstance: Egg = new Egg();
 
     init(params: GameParams) {
-        if(!params.counterElement || !params.eggElement) {
-            throw new Error('nie ma Elementu')
+        if (!params.counterElement || !params.eggElement) {
+            throw new Error("One of elements not found");
         }
-
         this.counterElement = params.counterElement;
-        this.eggElement = params.eggElement
+        this.eggElement = params.eggElement;
         this.displayEggClicks();
-        this.displayEgg();
+        this.mountEgg();
+        console.log("this", this);
+        console.log("Game started");
     }
 
     displayEggClicks() {
-        if(!this.counterElement) {
-            throw new Error('Counter element not found')
+        if (!this.counterElement) {
+            throw new Error("Counter element not found");
         }
 
         this.counterElement.innerText = String(this.eggInstance.eggClicks);
     }
 
-    displayEgg() {
+    startStopWatch() {
+        this.stopWatch = setInterval(() => {
+            this.secondsPassed++;
+        }, 1000);
+    }
+
+    updateEggClick() {
+        this.eggInstance.tapEgg();
+        this.displayEggClicks();
+
+        switch (this.eggInstance.eggClicks) {
+            case 1:
+                this.startStopWatch();
+                break;
+        }
+    }
+
+    mountEgg() {
         if (!this.eggElement) {
             throw new Error("Egg element not found");
         }
@@ -47,5 +63,6 @@ export class Game implements IGame {
         }
 
         this.eggElement.src = eggImageSrc;
+        this.eggElement.addEventListener("click", this.updateEggClick.bind(this));
     }
 }
